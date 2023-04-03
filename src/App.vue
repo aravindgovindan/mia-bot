@@ -45,7 +45,13 @@ div {
 }
 
 p {
-  margin: 0;
+  margin: 0.5rem;
   font-size: 1.2rem;
+}
+
+#results {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
 }
 </style>
