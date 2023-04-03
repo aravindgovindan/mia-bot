@@ -25,7 +25,7 @@ export default {
   },
   methods: {
     async analyzeQuery() {
-      const types = ['content', 'component', 'particle', 'placement', 'assembly', 'program', 'lesson', 'learning activity']
+      const types = ['content', 'component', 'particle', 'placement', 'program', 'product-class', 'assembly']
       const prompts = [
         { role: 'user', content: `You are a Helpbot for an internal application. Users will ask you questions to help them with something. You should breakdown their query and respond with a json object with keys: action, type, filter. Actions can be "view", "create", or "edit". Type can be one from the following list: ${types}` },
         { role: 'assistant', content: 'Okay. I will do that.' },
@@ -63,10 +63,17 @@ export default {
     },
     generateUrl(data) {
       let { action: a, type: t, filter: f } = data
-      console.log(a, t, f)
-      let url = `https://mia-staging.benchmarkconnect.com/editors/${t}`
-      let filters = this.generateFilters(f, t);
-      url = `${url}?q=${filters}`
+      const root = 'https://mia-staging.benchmarkconnect.com'
+      let url = ''
+      if (a === 'edit' && t === 'assembly') {
+        url = `${root}/constituents-management`
+        let assemblyCode = (f['id'] || '').startsWith('A-') ? f['id'] : `A-${f['id']}`
+        url = `${url}/${assemblyCode}`
+      } else {
+        url = `${root}/editors/${t}`
+        let filters = this.generateFilters(f, t);
+        url = `${url}?q=${filters}`
+      }
       this.miaUrl = url
     },
     generateFilters(filters, type) {
