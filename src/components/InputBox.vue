@@ -31,6 +31,8 @@ export default {
         { role: 'assistant', content: 'Okay. I will do that.' },
         { role: 'user', content: 'I want to create a new content record' },
         { role: 'assistant', content: '{"action": "create", "type": "content", "filter": {}}' },
+        { role: 'user', content: 'View all assemblies' },
+        { role: 'assistant', content: '{"action": "view", "type": "assembly", "filter": {"list_all": true}}' },
         { role: 'user', content: 'I want to change the metadata of particle with id X18273' },
         { role: 'assistant', content: '{"action": "edit",  "type": "particle",  "filter": {"id": "X18273"}}' },
         { role: 'user', content: this.query }
@@ -59,11 +61,23 @@ export default {
       const url = this.miaUrl;
       window.open(url, "_blank");
     },
-    generateUrl() {
-      // this.miaUrl = "https://chat.openai.com"
-      this.miaUrl = "https://mia-staging.benchmarkconnect.com/editors/content"
+    generateUrl(data) {
+      let { action: a, type: t, filter: f } = data
+      console.log(a, t, f)
+      let url = `https://mia-staging.benchmarkconnect.com/editors/${t}`
+      let filters = this.generateFilters(f, t);
+      url = `${url}?q=${filters}`
+      this.miaUrl = url
     },
-
+    generateFilters(filters, type) {
+      let options = {}
+      if (filters.list_all) {
+        options = {
+          [`${type}_code`]: { values: null, exactMatch: true, notMatch: true }
+        }
+      }
+      return encodeURIComponent(JSON.stringify(options)).replaceAll('%', '%25')
+    },
   },
 };
 </script>

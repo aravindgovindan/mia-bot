@@ -50,8 +50,10 @@ p {
 }
 
 #results {
-  display: flex;
-  flex-direction: column;
+  /* display: flex;
+  flex-direction: column; */
   text-align: left;
+  width: 100vw;
+  overflow-wrap: break-word;
 }
 </style>
