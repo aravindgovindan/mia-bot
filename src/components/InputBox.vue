@@ -8,6 +8,7 @@
       <p>Url: {{ miaUrl }}</p>
       <button @click="goToMia"><i class="fas fa-external-link-alt"></i>Open link</button>
     </div>
+    <div class="warning" v-if="warning">{{ warning }}</div>
   </div>
 </template>
 
@@ -20,14 +21,17 @@ export default {
       action: "",
       type: "",
       filter: "",
-      miaUrl: ""
+      miaUrl: "",
+      warning: "",
     };
   },
   methods: {
     async analyzeQuery() {
       const types = ['content', 'component', 'particle', 'placement', 'program', 'product-class', 'assembly']
       const prompts = [
-        { role: 'user', content: `You are a Helpbot for an internal application. Users will ask you questions to help them with something. You should breakdown their query and respond with a json object with keys: action, type, filter. Actions can be "view", "create", or "edit". Type can be one from the following list: ${types}` },
+        {
+          role: 'user', content: `You are a Helpbot for an internal application. Users will ask you questions to help them with something. You should breakdown their query and respond with a json object with keys: action, type, filter. Actions can be "view", "create", or "edit". Type can be one from the following list: ${types}. 
+        If user tries to access any other type or want to do any other action, return "{"warning": "Invalid entries"}"` },
         { role: 'assistant', content: 'Okay. I will do that.' },
         { role: 'user', content: 'I want to create a new content record' },
         { role: 'assistant', content: '{"action": "create", "type": "content", "filter": {}}' },
@@ -50,12 +54,17 @@ export default {
       });
       const data = await response.json();
       const choices = data?.choices[0];
-      const content = JSON.parse(choices.message.content)
-      const { action, type, filter } = content;
-      this.action = action;
-      this.type = type;
-      this.filter = filter;
-      this.generateUrl({ action, filter, type })
+      try {
+        const content = JSON.parse(choices.message.content)
+        const { action, type, filter } = content;
+        this.action = action;
+        this.type = type;
+        this.filter = filter;
+        if (action || type) this.generateUrl({ action, filter, type })
+        this.warning = ""
+      } catch (e) {
+        this.warning = choices.message.content
+      }
     },
     goToMia() {
       const url = this.miaUrl;
