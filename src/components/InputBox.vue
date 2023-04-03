@@ -88,8 +88,16 @@ export default {
     generateFilters(filters, type) {
       let options = {}
       if (filters.list_all) {
-        options = {
-          [`${type}_code`]: { values: null, exactMatch: true, notMatch: true }
+        switch (type) {
+          case 'product-class':
+            options = {
+              [`${type}_cuid`]: { values: null, exactMatch: true, notMatch: true }
+            }
+            break;
+          default:
+            options = {
+              [`${type}_code`]: { values: null, exactMatch: true, notMatch: true }
+            }
         }
       }
       return encodeURIComponent(JSON.stringify(options)).replaceAll('%', '%25')
